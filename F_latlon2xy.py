@@ -9,7 +9,7 @@
 # migrated to python version by Guanyu Huang 4/25/2018
 
 
-
+import datetime
 
 
 def F_latlon2xy(inp):
@@ -50,7 +50,7 @@ def F_latlon2xy(inp):
 
 # print(F_latlon2xy(inp))
 
- def F_oversample_OMI_km(inp, ouput_subset):
+def F_oversample_OMI_km(inp, ouput_subset):
 
  	output_oversample = {}
 
@@ -61,10 +61,7 @@ def F_latlon2xy(inp):
  		676.026977539063,620.728027343750,574.632019042969,
  		535.745971679688,502.919006347656,474.923004150391,
  		451.101989746094,430.649993896484,413.221008300781,
- 		398.187011718750,385.433013max_lon = clon+max_x*1.2/110/cos((abs(clat)+max_y/111)/180*pi);
-min_lon = clon-max_x*1.2/110/cos((abs(clat)+max_y/111)/180*pi);
-max_lat = clat+max_y*1.2/110;
-min_lat = clat-max_y*1.2/110;916016,374.503997802734,
+ 		398.187011718750,385.433013916016,374.503997802734,
  		365.376007080078,357.684997558594,351.493011474609,
  		346.483001708984,342.816009521484,340.184997558594,
  		338.792999267578,338.364990234375,339.161010742188,
@@ -88,7 +85,7 @@ min_lat = clat-max_y*1.2/110;916016,374.503997802734,
 	clat = inp['clat']
 	R = inp['R']
 
-	if hasattr(inp, 'do_weight'):
+	if 'do_weight' not inp:
 		do_weight = False
 	else:
 		do_weight = inp['do_weight']
@@ -99,10 +96,65 @@ min_lat = clat-max_y*1.2/110;916016,374.503997802734,
 	min_lat = clat-max_y*1.2/110
 
 #define x y grids
-	xgrid = 
-	ygrid = 
+	xgrid = np.arrange(-1*max_x+0.5*res, max_x, res)
+	ygrid = np.arrange(-1*max_y+0.5*res, max_y, res)
 	nrows = len(ygrid)
 	ncols = len(xgrid)
 
+#define x y mesh
+	xmesh, ymesh = np.meshgrid(xgrid, ygrid)
 
+#define 
+	MaxCF = inp['MaxCF']
+	MaxSZA = inp['MaxSZA']
+
+# xtrack to use
+
+	if 'usextrack' not in inp:
+		usextrack =1:60
+	else:
+		usextrack = inp['usextrack']
+
+	vcdname = inp['vcdname']
+	vcderrorname = inp['vcderrorname']
+
+	if 'useweekday' in inp:
+		useweekday = inp['useweekday']
+
+	if 'if_parallel' in inp:
+		if_parallel = False
+
+	else
+		if_parallel = inp.if_parallel
+
+
+f1 = output_subset['utc']+366 >= datetime.datetime(Startdate, 0, 0, 0).toordinal() &
+	output_subset['utc']+366 <= datetime.datetime(Enddate 23 59 59).toordinal()
+
+f2 = output_subset['latc'] >= min_lat-0.5 & output_subset['latc'] <= max_lat +0.5 &
+	output_subset['lonc'] >= min_lon-0.5 & output_subset['lonc'] <= max_lon +0.5 &
+	output_subset['latr'][:,1] >= min_lat-1 & output_subset['latr'][:,1] <= max_lat+1 &
+	output_subset['lonr'][:,1] >= min_lon-1 & output_subset['lonr'][:,1] <= max_lon+1
+
+f3 = output_subset['sza'] <= MaxSZA
+
+f4 = output_subset['cloudfrac'] <= MaxCF
+
+f5 = np.in1d(output_subset['ift'], usextrack)
+
+validmask = f1 & f2 & f3 & f4 & f5
+
+if 'useweekday' in locals():
+	f6 = datetime.datetime(output_subset['utc']).weekday()
+	# 0 monday and sunday is 6, return the day of week as an integer
+
+nL2 = np.sum(validmask)
+
+if nL2 <= 0:
+	return
+else:
+	print('Regridding pixels from %d to %d' (Startdate, Enddate))
+	print('%d piexels to be regridded...')
+
+Lat_c = output_subset['latc'][validmask]
 
